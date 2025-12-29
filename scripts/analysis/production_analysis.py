@@ -204,7 +204,6 @@ def create_production_visualizations():
         textprops={'fontsize': 11}
     )
 
-    # Make percentage text bold and white
     for autotext in autotexts:
         autotext.set_color('white')
         autotext.set_fontweight('bold')
@@ -250,19 +249,14 @@ def create_production_visualizations():
                  fontsize=16, fontweight='bold', y=0.98)
 
     # Save figure
-    output_path = "output/production_analysis.png"
-    Path("output").mkdir(exist_ok=True)
+    output_path = "scripts/analysis/output/production_analysis.png"
+    Path("scripts/analysis/output").mkdir(exist_ok=True)
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"\n✓ Visualization saved to: {output_path}")
+
 
     # Display
     plt.tight_layout()
     plt.show()
-
-    print("\n" + "="*80)
-    print("ANALYSIS COMPLETE")
-    print("="*80)
-
 
 if __name__ == "__main__":
     create_production_visualizations()

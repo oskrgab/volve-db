@@ -105,7 +105,6 @@ volve-db/
 │       ├── SCHEMA_DOCUMENTATION.md       # Database schema docs
 │       ├── USAGE_EXAMPLES.md             # Query examples
 │       └── README.md                     # Transformation guide
-├── CLAUDE.md                             # Development guidelines
 ├── pyproject.toml                        # Dependencies (uv)
 └── README.md                             # This file
 ```
@@ -137,7 +136,6 @@ ORDER BY total_oil DESC;
 - **[SCHEMA_DOCUMENTATION.md](scripts/transform/SCHEMA_DOCUMENTATION.md)** - Complete database schema with ER diagrams
 - **[USAGE_EXAMPLES.md](scripts/transform/USAGE_EXAMPLES.md)** - SQL queries and analysis examples
 - **[PRODUCTION_DATA_FINDINGS.md](scripts/explore/PRODUCTION_DATA_FINDINGS.md)** - Source data analysis
-- **[CLAUDE.md](CLAUDE.md)** - Development guidelines and principles
 
 ## Educational Focus
 
