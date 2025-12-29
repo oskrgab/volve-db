@@ -20,16 +20,9 @@ This directory contains scripts for transforming raw Volve production data from 
 
 ### Documentation
 
-- **`SCHEMA_DOCUMENTATION.md`** - Comprehensive database schema documentation
-  - Table structures and relationships
-  - Data types and constraints
-  - Query patterns and examples
-  - Transformation pipeline details
-
-- **`PRODUCTION_DATA_FINDINGS.md`** - Analysis of source Excel data
-  - Located in `scripts/explore/`
-  - Data quality observations
-  - Transformation requirements
+- **`SCHEMA_DOCUMENTATION.md`** - Complete database schema reference
+- **`USAGE_EXAMPLES.md`** - SQL query examples and analysis patterns
+- **`../explore/PRODUCTION_DATA_FINDINGS.md`** - Source data analysis
 
 ## Usage
 
@@ -45,38 +38,23 @@ This creates `database/volve.db` with three empty tables:
 - `daily_production` (time-series fact table)
 - `monthly_production` (time-series fact table)
 
-### 2. Load Data (Coming Next)
+### 2. Load Data
 
-Future scripts will:
-1. Extract unique wells from source data → populate `wells` table
-2. Transform daily production data → populate `daily_production` table
-3. Clean and transform monthly data → populate `monthly_production` table
+```bash
+# From project root
+uv run python scripts/transform/load_data.py
+```
+
+This script loads all data into the database:
+1. Extracts unique wells from source data → populates `wells` table
+2. Transforms daily production data → populates `daily_production` table
+3. Cleans and transforms monthly data → populates `monthly_production` table
 
 ## Database Schema Overview
 
-```
-wells (master table)
-├── npd_wellbore_code (PK)
-├── wellbore_code
-├── wellbore_name
-├── npd_field_code
-├── npd_field_name
-├── npd_facility_code
-└── npd_facility_name
+The database uses a **star schema** with one dimension table (wells) and two fact tables (daily_production, monthly_production).
 
-daily_production (time-series)
-├── date (PK)
-├── npd_wellbore_code (PK, FK → wells)
-├── [17 operational metrics]
-└── [4 production volumes]
-
-monthly_production (time-series)
-├── date (PK)
-├── npd_wellbore_code (PK, FK → wells)
-├── on_stream_hours
-├── [3 production volumes in Sm3]
-└── [2 injection volumes in Sm3]
-```
+For complete schema details, see **[SCHEMA_DOCUMENTATION.md](SCHEMA_DOCUMENTATION.md)**.
 
 ## Design Principles
 
@@ -120,15 +98,12 @@ Benefits:
 - Portable and version-controllable
 - ~5-10 MB when fully loaded
 
-## Next Steps
+## Current Status
 
-1. ✅ Schema created
-2. ⏳ Implement data loading scripts:
-   - `load_wells.py` - Extract and load unique wells
-   - `load_daily_production.py` - Load daily data
-   - `load_monthly_production.py` - Load monthly data
-3. ⏳ Data validation scripts
-4. ⏳ Create SQL query examples
+1. ✅ Schema created (`create_tables.py`)
+2. ✅ Data loading implemented (`load_data.py`)
+3. ✅ Database populated with 7 wells, 15,634 daily records, 526 monthly records
+4. ✅ SQL query examples available in [USAGE_EXAMPLES.md](USAGE_EXAMPLES.md)
 
 ## Dependencies
 

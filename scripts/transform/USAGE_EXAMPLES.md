@@ -362,22 +362,6 @@ plt.savefig('production_history.png', dpi=150)
 plt.show()
 ```
 
-## Database Statistics
-
-**Current database size**: ~3.2 MB
-
-**Table counts**:
-- wells: 7 records
-- daily_production: 15,634 records
-- monthly_production: 526 records
-
-**Date coverage**: September 2007 - December 2016 (9+ years)
-
-**Top producing wells** (by cumulative oil):
-1. 15/9-F-12: 4.58M units
-2. 15/9-F-14: 3.94M units
-3. 15/9-F-11: 1.15M units
-
 ## Tips for Efficient Queries
 
 1. **Always filter on indexed columns** when possible:

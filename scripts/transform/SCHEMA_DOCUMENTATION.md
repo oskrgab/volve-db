@@ -252,56 +252,16 @@ water_injection_sm3: NULL
 
 ---
 
-## Query Patterns
+## Query Examples
 
-### 1. Get all production for a specific well
-```sql
--- Using explicit SQL with SQLAlchemy Core
-SELECT w.wellbore_name, d.date, d.oil_volume, d.gas_volume
-FROM wells w
-JOIN daily_production d ON w.npd_wellbore_code = d.npd_wellbore_code
-WHERE w.npd_wellbore_code = 7405
-ORDER BY d.date;
-```
+For comprehensive SQL query examples and analysis patterns, see **[USAGE_EXAMPLES.md](USAGE_EXAMPLES.md)**.
 
-### 2. Monthly production summary across all wells
-```sql
-SELECT
-    w.wellbore_name,
-    m.date,
-    m.oil_volume_sm3,
-    m.gas_volume_sm3
-FROM wells w
-JOIN monthly_production m ON w.npd_wellbore_code = m.npd_wellbore_code
-WHERE m.date BETWEEN '2014-01-01' AND '2014-12-01'
-ORDER BY m.date, w.wellbore_name;
-```
-
-### 3. Compare daily vs monthly aggregates
-```sql
--- Daily sum for a month
-SELECT
-    strftime('%Y-%m', d.date) as year_month,
-    SUM(d.oil_volume) as daily_oil_sum
-FROM daily_production d
-WHERE npd_wellbore_code = 7405
-GROUP BY year_month;
-
--- Monthly data
-SELECT
-    m.date,
-    m.oil_volume_sm3 as monthly_oil
-FROM monthly_production m
-WHERE npd_wellbore_code = 7405;
-```
-
-### 4. Find water injection wells
-```sql
-SELECT DISTINCT w.*
-FROM wells w
-JOIN daily_production d ON w.npd_wellbore_code = d.npd_wellbore_code
-WHERE d.well_type = 'WI';
-```
+Examples include:
+- Production summaries by well
+- Time-series analysis
+- Well performance comparison
+- Using Pandas, Polars, and DuckDB
+- Data visualization with matplotlib
 
 ---
 

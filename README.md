@@ -22,22 +22,13 @@ This project demonstrates the advantages of structured databases over Excel-only
 - **526 monthly production records** (2007-2016)
 - **Database size**: 3.2 MB
 
-### Tables
+### Schema Overview
 
-```
-wells (master table)
-├── 7 unique wellbores
-└── Static attributes: codes, names, field, facility
+- **wells**: Master dimension table (7 wellbores)
+- **daily_production**: Daily measurements (15,634 records, 2007-2016)
+- **monthly_production**: Monthly aggregates (526 records, 2007-2016)
 
-daily_production (time-series)
-├── 15,634 daily measurements
-├── Operational metrics: pressure, temperature, choke
-└── Production volumes: oil, gas, water
-
-monthly_production (time-series)
-├── 526 monthly aggregates
-└── Production volumes in Sm3 (standard cubic meters)
-```
+All tables are related via `npd_wellbore_code` foreign keys.
 
 ## Quick Start
 
@@ -134,27 +125,12 @@ GROUP BY w.wellbore_name
 ORDER BY total_oil DESC;
 ```
 
-### Production Over Time
-
-```sql
-SELECT
-    strftime('%Y', d.date) as year,
-    ROUND(SUM(d.oil_volume), 2) as yearly_oil
-FROM daily_production d
-GROUP BY year
-ORDER BY year;
-```
-
-### Find Water Injection Wells
-
-```sql
-SELECT DISTINCT w.wellbore_name
-FROM wells w
-JOIN daily_production d ON w.npd_wellbore_code = d.npd_wellbore_code
-WHERE d.well_type = 'WI';
-```
-
-See [USAGE_EXAMPLES.md](scripts/transform/USAGE_EXAMPLES.md) for more examples.
+**See [USAGE_EXAMPLES.md](scripts/transform/USAGE_EXAMPLES.md) for comprehensive query examples including:**
+- Production summaries by well
+- Time-series analysis
+- Well performance comparison
+- Pandas, Polars, and DuckDB examples
+- Visualization with matplotlib
 
 ## Documentation
 
@@ -282,29 +258,28 @@ Optional for analysis:
 
 ## Database Schema
 
-### Star Schema Design
+The database uses a **star schema** design:
 
-```mermaid
-graph TD
-    W[WELLS<br/>Dimension<br/>7 wells]
-    D[DAILY_PRODUCTION<br/>Fact<br/>15,634 records]
-    M[MONTHLY_PRODUCTION<br/>Fact<br/>526 records]
+```
+wells (dimension)
+├── 7 unique wellbores
+└── Static attributes: codes, names, field, facility
 
-    W -->|1:N| D
-    W -->|1:N| M
+daily_production (fact)
+├── 15,634 daily measurements
+├── Operational metrics: pressure, temperature, choke
+└── Production volumes: oil, gas, water
 
-    style W fill:#e1f5ff,stroke:#0066cc,stroke-width:3px
-    style D fill:#fff4e1,stroke:#ff9800,stroke-width:2px
-    style M fill:#fff4e1,stroke:#ff9800,stroke-width:2px
+monthly_production (fact)
+├── 526 monthly aggregates
+└── Production volumes in Sm3
 ```
 
-### Relationships
-
-- **wells** ↔ **daily_production**: 1:N (one well, many daily records)
-- **wells** ↔ **monthly_production**: 1:N (one well, many monthly records)
-- **daily_production** ↔ **monthly_production**: No direct relationship
-
-See [SCHEMA_DOCUMENTATION.md](scripts/transform/SCHEMA_DOCUMENTATION.md) for complete details.
+**See [SCHEMA_DOCUMENTATION.md](scripts/transform/SCHEMA_DOCUMENTATION.md) for:**
+- Complete table schemas with all columns
+- ER diagrams and relationship details
+- Data types, constraints, and indexes
+- ETL pipeline documentation
 
 ## Data Quality
 
