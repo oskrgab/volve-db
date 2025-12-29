@@ -209,3 +209,4 @@ __marimo__/
 .mcp.json
 CLAUDE.md
 .spec-workflow
+.DS_Store
