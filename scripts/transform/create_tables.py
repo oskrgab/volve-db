@@ -12,9 +12,7 @@ The wells table serves as the parent, with daily_production and monthly_producti
 as child tables referencing wells via foreign key relationships.
 """
 
-from pathlib import Path
 from sqlalchemy import (
-    create_engine,
     MetaData,
     Table,
     Column,
@@ -26,6 +24,7 @@ from sqlalchemy import (
     Index,
 )
 
+from db_utils import create_database_engine
 from constants import (
     # Table names
     TABLE_WELLS,
@@ -69,33 +68,22 @@ from constants import (
     MONTHLY_WATER_INJECTION,
     # Database path
     DATABASE_PATH,
+    SEPARATOR_LINE,
 )
 
 
-def create_database_engine(db_path: str) -> tuple:
+def create_time_series_indexes(table: Table, date_col: str, wellbore_col: str, prefix: str) -> None:
     """
-    Create SQLite database engine and metadata object.
+    Create standard indexes for time-series tables.
 
     Args:
-        db_path: Path to the SQLite database file
-
-    Returns:
-        Tuple of (engine, metadata) objects
+        table: SQLAlchemy Table object
+        date_col: Name of the date column
+        wellbore_col: Name of the wellbore code column
+        prefix: Prefix for index names (e.g., 'daily', 'monthly')
     """
-    # Ensure database directory exists
-    db_file = Path(db_path)
-    db_file.parent.mkdir(parents=True, exist_ok=True)
-
-    # Create engine with SQLite-specific settings
-    engine = create_engine(
-        f"sqlite:///{db_path}",
-        echo=True,  # Print SQL statements for educational purposes
-    )
-
-    # Create metadata object to hold table definitions
-    metadata = MetaData()
-
-    return engine, metadata
+    Index(f"ix_{prefix}_date", table.c[date_col])
+    Index(f"ix_{prefix}_wellbore", table.c[wellbore_col])
 
 
 def define_wells_table(metadata: MetaData) -> Table:
@@ -116,14 +104,12 @@ def define_wells_table(metadata: MetaData) -> Table:
     wells = Table(
         TABLE_WELLS,
         metadata,
-        # Primary key: Unique well identifier
         Column(
             WELLS_NPD_WELLBORE_CODE,
             Integer,
             primary_key=True,
             comment="Norwegian Petroleum Directorate unique wellbore code",
         ),
-        # Well identification
         Column(
             WELLS_WELLBORE_CODE,
             Text,
@@ -136,7 +122,6 @@ def define_wells_table(metadata: MetaData) -> Table:
             nullable=False,
             comment="NPD well bore name",
         ),
-        # Field information (Volve field)
         Column(
             WELLS_NPD_FIELD_CODE,
             Integer,
@@ -149,7 +134,6 @@ def define_wells_table(metadata: MetaData) -> Table:
             nullable=False,
             comment="Field name",
         ),
-        # Facility information
         Column(
             WELLS_NPD_FACILITY_CODE,
             Integer,
@@ -186,7 +170,6 @@ def define_daily_production_table(metadata: MetaData) -> Table:
     daily_production = Table(
         TABLE_DAILY_PRODUCTION,
         metadata,
-        # Primary key components
         Column(
             DAILY_DATE,
             Date,
@@ -202,13 +185,11 @@ def define_daily_production_table(metadata: MetaData) -> Table:
             nullable=False,
             comment="Reference to wells table",
         ),
-        # Operational metrics - time on stream
         Column(
             DAILY_ON_STREAM_HRS,
             Float,
             comment="Hours the well was producing",
         ),
-        # Pressure measurements (bar or psi - units from source data)
         Column(
             DAILY_AVG_DOWNHOLE_PRESSURE,
             Float,
@@ -229,7 +210,6 @@ def define_daily_production_table(metadata: MetaData) -> Table:
             Float,
             comment="Average wellhead pressure",
         ),
-        # Temperature measurements
         Column(
             DAILY_AVG_DOWNHOLE_TEMPERATURE,
             Float,
@@ -240,7 +220,6 @@ def define_daily_production_table(metadata: MetaData) -> Table:
             Float,
             comment="Average wellhead temperature",
         ),
-        # Choke measurements
         Column(
             DAILY_AVG_CHOKE_SIZE_P,
             Float,
@@ -256,7 +235,6 @@ def define_daily_production_table(metadata: MetaData) -> Table:
             Float,
             comment="Differential pressure choke size",
         ),
-        # Production volumes
         Column(
             DAILY_BORE_OIL_VOL,
             Float,
@@ -277,7 +255,6 @@ def define_daily_production_table(metadata: MetaData) -> Table:
             Float,
             comment="Water injection volume (for injection wells)",
         ),
-        # Classification
         Column(
             DAILY_FLOW_KIND,
             Text,
@@ -290,16 +267,7 @@ def define_daily_production_table(metadata: MetaData) -> Table:
         ),
     )
 
-    # Create indexes for common query patterns
-    Index(
-        "ix_daily_date",
-        daily_production.c[DAILY_DATE],
-    )
-
-    Index(
-        "ix_daily_wellbore",
-        daily_production.c[DAILY_NPD_WELLBORE_CODE],
-    )
+    create_time_series_indexes(daily_production, DAILY_DATE, DAILY_NPD_WELLBORE_CODE, "daily")
 
     return daily_production
 
@@ -325,7 +293,6 @@ def define_monthly_production_table(metadata: MetaData) -> Table:
     monthly_production = Table(
         TABLE_MONTHLY_PRODUCTION,
         metadata,
-        # Primary key components
         Column(
             MONTHLY_DATE,
             Date,
@@ -341,13 +308,11 @@ def define_monthly_production_table(metadata: MetaData) -> Table:
             nullable=False,
             comment="Reference to wells table",
         ),
-        # Operational metric
         Column(
             MONTHLY_ON_STREAM,
             Float,
             comment="Total hours on stream for the month",
         ),
-        # Production volumes (Sm3 - Standard cubic meters)
         Column(
             MONTHLY_OIL_VOL,
             Float,
@@ -363,7 +328,6 @@ def define_monthly_production_table(metadata: MetaData) -> Table:
             Float,
             comment="Water volume produced (Sm3)",
         ),
-        # Injection volumes (Sm3)
         Column(
             MONTHLY_GAS_INJECTION,
             Float,
@@ -376,16 +340,7 @@ def define_monthly_production_table(metadata: MetaData) -> Table:
         ),
     )
 
-    # Create indexes for common query patterns
-    Index(
-        "ix_monthly_date",
-        monthly_production.c[MONTHLY_DATE],
-    )
-
-    Index(
-        "ix_monthly_wellbore",
-        monthly_production.c[MONTHLY_NPD_WELLBORE_CODE],
-    )
+    create_time_series_indexes(monthly_production, MONTHLY_DATE, MONTHLY_NPD_WELLBORE_CODE, "monthly")
 
     return monthly_production
 
@@ -398,44 +353,25 @@ def create_tables(db_path: str = DATABASE_PATH) -> None:
     1. Creates the database engine
     2. Defines all table schemas
     3. Creates tables in the database (if they don't exist)
-    4. Prints SQL statements for educational purposes
 
     Args:
         db_path: Path to SQLite database file (default from constants)
     """
-    print("="*80)
+    print(SEPARATOR_LINE)
     print("CREATING VOLVE PRODUCTION DATABASE SCHEMA")
-    print("="*80)
-    print(f"\nDatabase location: {db_path}\n")
+    print(SEPARATOR_LINE)
+    print(f"Database: {db_path}")
 
-    # Create engine and metadata
-    engine, metadata = create_database_engine(db_path)
+    engine, metadata = create_database_engine(db_path, echo=True)
 
-    # Define tables (order matters for foreign keys)
-    print("Defining table schemas...")
     wells = define_wells_table(metadata)
     daily_production = define_daily_production_table(metadata)
     monthly_production = define_monthly_production_table(metadata)
 
-    print(f"\nTables defined:")
-    print(f"  1. {TABLE_WELLS} (master table)")
-    print(f"  2. {TABLE_DAILY_PRODUCTION} (time-series)")
-    print(f"  3. {TABLE_MONTHLY_PRODUCTION} (time-series)")
-
-    # Create all tables
-    print("\nCreating tables in database...")
-    print("-"*80)
     metadata.create_all(engine)
-    print("-"*80)
 
-    print("\n" + "="*80)
-    print("DATABASE SCHEMA CREATED SUCCESSFULLY")
-    print("="*80)
-    print(f"\nNext steps:")
-    print(f"  1. Run transformation scripts to load data from Excel")
-    print(f"  2. Validate data integrity")
-    print(f"  3. Begin analysis queries")
-    print()
+    print(f"\n✓ Database schema created successfully")
+    print(f"✓ Tables: {TABLE_WELLS}, {TABLE_DAILY_PRODUCTION}, {TABLE_MONTHLY_PRODUCTION}\n")
 
 
 def print_schema_info() -> None:
@@ -444,9 +380,9 @@ def print_schema_info() -> None:
 
     Useful for documentation and understanding the database structure.
     """
-    print("="*80)
+    print(SEPARATOR_LINE)
     print("VOLVE PRODUCTION DATABASE SCHEMA")
-    print("="*80)
+    print(SEPARATOR_LINE)
 
     print(f"\n1. {TABLE_WELLS.upper()} (Master Table)")
     print("   Purpose: One row per unique wellbore")
@@ -492,7 +428,7 @@ def print_schema_info() -> None:
     print("  wells 1:N monthly_production")
     print("  (daily_production and monthly_production are independent)")
 
-    print("\n" + "="*80)
+    print(f"\n{SEPARATOR_LINE}")
 
 
 if __name__ == "__main__":
@@ -502,3 +438,4 @@ if __name__ == "__main__":
     # Create tables
     print("\n")
     create_tables()
+    

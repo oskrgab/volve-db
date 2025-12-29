@@ -149,6 +149,9 @@ SOURCE_MONTHLY_WI = "WI"
 # Database file path (relative to project root)
 DATABASE_PATH = "database/volve.db"
 
+# Display formatting
+SEPARATOR_LINE = "=" * 80
+
 # Source data file path
 SOURCE_EXCEL_PATH = "data/production/Volve production data.xlsx"
 
