@@ -1,15 +1,9 @@
 """
-Volve Production Data Analysis
+Shared utilities for Volve production data analysis.
 
-This script demonstrates how to query the SQLite database using DuckDB and
-visualize production data using matplotlib and polars.
-
-Visualizations created:
-1. Total daily field production (oil, water) over time - line plot
-2. Cumulative oil production by well - horizontal bar chart
-3. Overall field cumulative production (oil, water) - pie chart
-
-All plots are arranged in a single figure with custom layout.
+This module contains reusable functions for querying production data
+and creating visualizations, supporting both local SQLite and remote
+Parquet data sources.
 """
 
 from pathlib import Path
@@ -18,29 +12,31 @@ import polars as pl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-# Database path
-DATABASE_PATH = "database/volve.db"
 
-
-def query_daily_field_totals(conn: duckdb.DuckDBPyConnection) -> pl.DataFrame:
+def query_daily_field_totals(
+    conn: duckdb.DuckDBPyConnection,
+    daily_production_table: str
+) -> pl.DataFrame:
     """
     Query total daily production volumes across all wells.
 
     This aggregates production from all wells to get field-level daily totals.
 
     Args:
-        conn: DuckDB connection to the SQLite database
+        conn: DuckDB connection
+        daily_production_table: Table source (e.g., "daily_production" or
+                               "read_parquet('url/daily_production.parquet')")
 
     Returns:
         Polars DataFrame with columns: date, total_oil, total_gas, total_water
     """
-    query = """
+    query = f"""
         SELECT
             date,
             SUM(oil_volume) as total_oil,
             SUM(gas_volume) as total_gas,
             SUM(water_volume) as total_water
-        FROM daily_production
+        FROM {daily_production_table}
         WHERE oil_volume IS NOT NULL
           AND gas_volume IS NOT NULL
           AND water_volume IS NOT NULL
@@ -48,56 +44,64 @@ def query_daily_field_totals(conn: duckdb.DuckDBPyConnection) -> pl.DataFrame:
         ORDER BY date
     """
 
-    # Execute query and convert to polars DataFrame
     result = conn.execute(query).pl()
-
     return result
 
 
-def query_cumulative_oil_by_well(conn: duckdb.DuckDBPyConnection) -> pl.DataFrame:
+def query_cumulative_oil_by_well(
+    conn: duckdb.DuckDBPyConnection,
+    daily_production_table: str,
+    wells_table: str
+) -> pl.DataFrame:
     """
     Query cumulative oil production by well, sorted from highest to lowest.
 
-    Joins with wells table to get well names for better readability.
+    Joins wells and daily_production tables to get well names.
 
     Args:
-        conn: DuckDB connection to the SQLite database
+        conn: DuckDB connection
+        daily_production_table: Daily production table source
+        wells_table: Wells table source
 
     Returns:
         Polars DataFrame with columns: wellbore_name, cumulative_oil
     """
-    query = """
+    query = f"""
         SELECT
             w.wellbore_name,
             SUM(dp.oil_volume) as cumulative_oil
-        FROM daily_production dp
-        INNER JOIN wells w ON dp.npd_wellbore_code = w.npd_wellbore_code
+        FROM {daily_production_table} dp
+        INNER JOIN {wells_table} w
+            ON dp.npd_wellbore_code = w.npd_wellbore_code
         WHERE dp.oil_volume IS NOT NULL
         GROUP BY w.wellbore_name
         ORDER BY cumulative_oil DESC
     """
 
     result = conn.execute(query).pl()
-
     return result
 
 
-def query_field_cumulative_totals(conn: duckdb.DuckDBPyConnection) -> dict:
+def query_field_cumulative_totals(
+    conn: duckdb.DuckDBPyConnection,
+    daily_production_table: str
+) -> dict:
     """
     Query total cumulative production volumes for the entire field.
 
     Args:
-        conn: DuckDB connection to the SQLite database
+        conn: DuckDB connection
+        daily_production_table: Daily production table source
 
     Returns:
         Dictionary with keys: oil, gas, water
     """
-    query = """
+    query = f"""
         SELECT
             SUM(oil_volume) as total_oil,
             SUM(gas_volume) as total_gas,
             SUM(water_volume) as total_water
-        FROM daily_production
+        FROM {daily_production_table}
         WHERE oil_volume IS NOT NULL
           AND gas_volume IS NOT NULL
           AND water_volume IS NOT NULL
@@ -112,7 +116,13 @@ def query_field_cumulative_totals(conn: duckdb.DuckDBPyConnection) -> dict:
     }
 
 
-def create_production_visualizations():
+def create_production_visualizations(
+    daily_totals: pl.DataFrame,
+    well_cumulatives: pl.DataFrame,
+    field_totals: dict,
+    output_path: str,
+    title_suffix: str = ""
+):
     """
     Create comprehensive production visualizations.
 
@@ -120,41 +130,18 @@ def create_production_visualizations():
     - Top: Line plot of daily field production (full width)
     - Bottom left: Pie chart of field cumulative production
     - Bottom right: Horizontal bar chart of well oil cumulatives
+
+    Args:
+        daily_totals: DataFrame with date, total_oil, total_gas, total_water
+        well_cumulatives: DataFrame with wellbore_name, cumulative_oil
+        field_totals: Dictionary with oil, gas, water totals
+        output_path: Path where to save the figure
+        title_suffix: Optional suffix to add to plot titles (e.g., "Remote Parquet")
     """
-    print("="*80)
-    print("VOLVE PRODUCTION DATA ANALYSIS")
-    print("="*80)
-
-    # Connect to database via DuckDB
-    print(f"\nConnecting to database: {DATABASE_PATH}")
-    conn = duckdb.connect(DATABASE_PATH, read_only=True)
-
-    # Query data
-    print("\nQuerying data...")
-    print("  1. Daily field production totals")
-    daily_totals = query_daily_field_totals(conn)
-    print(f"     → {len(daily_totals)} days of production data")
-
-    print("  2. Cumulative oil production by well")
-    well_cumulatives = query_cumulative_oil_by_well(conn)
-    print(f"     → {len(well_cumulatives)} wells")
-
-    print("  3. Field cumulative totals")
-    field_totals = query_field_cumulative_totals(conn)
-    print(f"     → Oil: {field_totals['oil']:,.0f} sm3")
-    print(f"     → Gas: {field_totals['gas']:,.0f} sm3")
-    print(f"     → Water: {field_totals['water']:,.0f} sm3")
-
-    conn.close()
-
-    # Create figure with custom layout
     print("\nCreating visualizations...")
     fig = plt.figure(figsize=(16, 10))
 
     # Define grid layout: 2 rows, 2 columns
-    # Top plot spans both columns (row 0, col 0-1)
-    # Bottom left: pie chart (row 1, col 0)
-    # Bottom right: bar chart (row 1, col 1)
     gs = fig.add_gridspec(2, 2, height_ratios=[2, 1], hspace=0.3, wspace=0.3)
 
     # =========================================================================
@@ -162,10 +149,8 @@ def create_production_visualizations():
     # =========================================================================
     ax1 = fig.add_subplot(gs[0, :])  # Spans both columns
 
-    # Convert date column to datetime for better plotting
     dates = daily_totals['date'].to_list()
 
-    # Plot each production type
     ax1.plot(dates, daily_totals['total_oil'],
              label='Oil', color='green', linewidth=1.5, alpha=0.8)
     ax1.plot(dates, daily_totals['total_water'],
@@ -173,8 +158,12 @@ def create_production_visualizations():
 
     ax1.set_xlabel('Date', fontsize=12)
     ax1.set_ylabel('Daily Production (sm3)', fontsize=12)
-    ax1.set_title('Volve Field - Daily Production Over Time',
-                  fontsize=14, fontweight='bold', pad=20)
+
+    title = 'Volve Field - Daily Production Over Time'
+    if title_suffix:
+        title += f' ({title_suffix})'
+    ax1.set_title(title, fontsize=14, fontweight='bold', pad=20)
+
     ax1.legend(loc='upper right', fontsize=11)
     ax1.grid(True, alpha=0.3, linestyle='--')
     ax1.set_ylim(bottom=0)
@@ -189,12 +178,10 @@ def create_production_visualizations():
     # =========================================================================
     ax2 = fig.add_subplot(gs[1, 0])
 
-    # Prepare data for pie chart
     labels = ['Oil', 'Water']
     values = [field_totals['oil'], field_totals['water']]
     colors = ['green', 'blue']
 
-    # Create pie chart with percentage labels
     wedges, texts, autotexts = ax2.pie(
         values,
         labels=labels,
@@ -220,12 +207,10 @@ def create_production_visualizations():
     # Take top 15 wells for readability
     top_wells = well_cumulatives.head(15)
 
-    # Create horizontal bar chart
     y_positions = range(len(top_wells))
     ax3.barh(y_positions, top_wells['cumulative_oil'],
              color='green', alpha=0.7, edgecolor='black', linewidth=0.5)
 
-    # Set well names as y-tick labels
     ax3.set_yticks(y_positions)
     ax3.set_yticklabels(top_wells['wellbore_name'], fontsize=9)
 
@@ -234,7 +219,6 @@ def create_production_visualizations():
                   fontsize=12, fontweight='bold', pad=15)
     ax3.grid(True, axis='x', alpha=0.3, linestyle='--')
 
-    # Invert y-axis so highest producer is at top
     ax3.invert_yaxis()
 
     # Add value labels on bars
@@ -245,18 +229,16 @@ def create_production_visualizations():
                 va='center', ha='left', fontsize=8)
 
     # Overall figure title
-    fig.suptitle('Volve Field Production Analysis',
-                 fontsize=16, fontweight='bold', y=0.98)
+    main_title = 'Volve Field Production Analysis'
+    if title_suffix:
+        main_title += f' ({title_suffix})'
+    fig.suptitle(main_title, fontsize=16, fontweight='bold', y=0.98)
 
     # Save figure
-    output_path = "scripts/analysis/output/production_analysis.png"
-    Path("scripts/analysis/output").mkdir(exist_ok=True)
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
-
+    print(f"✓ Figure saved to: {output_path}")
 
     # Display
     plt.tight_layout()
     plt.show()
-
-if __name__ == "__main__":
-    create_production_visualizations()
