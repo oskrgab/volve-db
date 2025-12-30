@@ -1,0 +1,330 @@
+{
+  "database": "volve.db",
+  "description": "Equinor Volve production dataset",
+  "tables": {
+    "daily_production": {
+      "columns": [
+        {
+          "name": "date",
+          "type": "DATE",
+          "not_null": true,
+          "default_value": null,
+          "primary_key": true,
+          "comment": null
+        },
+        {
+          "name": "npd_wellbore_code",
+          "type": "INTEGER",
+          "not_null": true,
+          "default_value": null,
+          "primary_key": true,
+          "comment": null
+        },
+        {
+          "name": "on_stream_hours",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "avg_downhole_pressure",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "avg_dp_tubing",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "avg_annulus_pressure",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "avg_wellhead_pressure",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "avg_downhole_temperature",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "avg_wellhead_temperature",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "avg_choke_size_percent",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "avg_choke_unit",
+          "type": "TEXT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "dp_choke_size",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "oil_volume",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "gas_volume",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "water_volume",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "water_injection_volume",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "flow_kind",
+          "type": "TEXT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "well_type",
+          "type": "TEXT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column": "npd_wellbore_code",
+          "references_table": "wells",
+          "references_column": "npd_wellbore_code"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_daily_date",
+          "unique": 0,
+          "columns": [
+            "date"
+          ]
+        },
+        {
+          "name": "ix_daily_wellbore",
+          "unique": 0,
+          "columns": [
+            "npd_wellbore_code"
+          ]
+        }
+      ]
+    },
+    "wells": {
+      "columns": [
+        {
+          "name": "npd_wellbore_code",
+          "type": "INTEGER",
+          "not_null": true,
+          "default_value": null,
+          "primary_key": true,
+          "comment": null
+        },
+        {
+          "name": "wellbore_code",
+          "type": "TEXT",
+          "not_null": true,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "wellbore_name",
+          "type": "TEXT",
+          "not_null": true,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "npd_field_code",
+          "type": "INTEGER",
+          "not_null": true,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "npd_field_name",
+          "type": "TEXT",
+          "not_null": true,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "npd_facility_code",
+          "type": "INTEGER",
+          "not_null": true,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "npd_facility_name",
+          "type": "TEXT",
+          "not_null": true,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": []
+    },
+    "monthly_production": {
+      "columns": [
+        {
+          "name": "date",
+          "type": "DATE",
+          "not_null": true,
+          "default_value": null,
+          "primary_key": true,
+          "comment": null
+        },
+        {
+          "name": "npd_wellbore_code",
+          "type": "INTEGER",
+          "not_null": true,
+          "default_value": null,
+          "primary_key": true,
+          "comment": null
+        },
+        {
+          "name": "on_stream_hours",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "oil_volume_sm3",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "gas_volume_sm3",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "water_volume_sm3",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "gas_injection_sm3",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        },
+        {
+          "name": "water_injection_sm3",
+          "type": "FLOAT",
+          "not_null": false,
+          "default_value": null,
+          "primary_key": false,
+          "comment": null
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column": "npd_wellbore_code",
+          "references_table": "wells",
+          "references_column": "npd_wellbore_code"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "ix_monthly_wellbore",
+          "unique": 0,
+          "columns": [
+            "npd_wellbore_code"
+          ]
+        },
+        {
+          "name": "ix_monthly_date",
+          "unique": 0,
+          "columns": [
+            "date"
+          ]
+        }
+      ]
+    }
+  }
+}
