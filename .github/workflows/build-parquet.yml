@@ -32,6 +32,9 @@ jobs:
       - name: Export Parquet from Database
         run: uv run python -m scripts.export.parquet_export
 
+      - name: Export Database Schema
+        run: uv run python -m scripts.export.export_schema
+
       - name: Commit and push changes
         run: |
           git config --global user.name "GitHub Actions"
