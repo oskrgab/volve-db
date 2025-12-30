@@ -207,7 +207,4 @@ marimo/_lsp/
 __marimo__/
 
 .mcp.json
-CLAUDE.md
-.spec-workflow
 .DS_Store
-.gemini/

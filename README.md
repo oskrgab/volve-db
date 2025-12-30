@@ -85,6 +85,32 @@ print(df)
 conn.close()
 ```
 
+## Parquet Export for Client-Side Analytics
+
+This project provides automated Parquet exports of all database tables. Parquet files are columnar, compressed, and ideal for high-performance analytics directly in the browser (via DuckDB-WASM) or in Python without needing to manage a local SQLite file.
+
+### 1. Run Export Manually
+
+```bash
+# Export all tables to parquet/ directory
+uv run python scripts/export/parquet_export.py
+```
+
+### 2. Output Location
+
+Exported files are stored in the `parquet/` directory:
+- `parquet/wells.parquet`
+- `parquet/daily_production.parquet`
+- `parquet/monthly_production.parquet`
+- `parquet/README.md` (metadata summary)
+
+### 3. Access via CDN
+
+If hosted on GitHub, these files are automatically deployed to GitHub Pages and can be accessed via URL (useful for DuckDB-WASM):
+`https://<username>.github.io/<repo>/parquet/daily_production.parquet`
+
+**See [parquet/README.md](parquet/README.md) for comprehensive usage examples with DuckDB-WASM, Pandas, and Polars.**
+
 ## Project Structure
 
 ```
@@ -94,10 +120,16 @@ volve-db/
 │       └── Volve production data.xlsx    # Source data (download)
 ├── database/
 │   └── volve.db                          # SQLite database (generated)
+├── parquet/
+│   └── *.parquet                         # Columnar exports (generated)
 ├── scripts/
 │   ├── explore/
 │   │   ├── analyze_production_data.py    # Data exploration
 │   │   └── PRODUCTION_DATA_FINDINGS.md   # Analysis results
+│   ├── export/
+│   │   ├── export_constants.py           # Export configuration
+│   │   ├── export_utils.py               # Validation utilities
+│   │   └── parquet_export.py             # Export implementation
 │   └── transform/
 │       ├── constants.py                  # Reusable column definitions
 │       ├── create_tables.py              # Schema creation
