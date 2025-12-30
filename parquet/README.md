@@ -7,9 +7,9 @@ This directory contains Parquet exports of the Volve production database. These 
 <!-- START_METADATA_TABLE -->
 | Table Name | Rows | File Size (MB) | Last Updated |
 | :--- | :--- | :--- | :--- |
-| wells | 7 | 0.0048 | 2025-12-29 18:34:49 |
-| daily_production | 15,634 | 0.8341 | 2025-12-29 18:34:49 |
-| monthly_production | 526 | 0.0174 | 2025-12-29 18:34:49 |
+| wells | 7 | 0.0048 | 2025-12-29 22:37:29 |
+| daily_production | 15,634 | 0.8341 | 2025-12-29 22:37:29 |
+| monthly_production | 526 | 0.0174 | 2025-12-29 22:37:29 |
 <!-- END_METADATA_TABLE -->
 
 ## Usage with DuckDB-WASM (Browser)

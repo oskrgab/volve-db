@@ -30,7 +30,7 @@ jobs:
         run: uv sync
 
       - name: Export Parquet from Database
-        run: uv run python scripts/export/parquet_export.py
+        run: uv run python -m scripts.export.parquet_export
 
       - name: Commit and push changes
         run: |
