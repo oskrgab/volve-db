@@ -26,6 +26,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Ensure CNAME file exists
+        run: echo "volve-db.oscarcortez.me" > parquet/CNAME
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
