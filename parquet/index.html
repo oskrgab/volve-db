@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volve Production Database | Parquet Data Repository</title>
+    <title>Volve Database | Parquet Data Repository</title>
+    <link rel="icon" type="image/svg+xml" href="database-position-svgrepo-com.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -96,11 +97,33 @@
             }
         }
 
+        .title-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 16px;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes iconFloat {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
         .title {
             font-family: 'IBM Plex Mono', monospace;
             font-size: 3.5rem;
             font-weight: 600;
-            margin-bottom: 16px;
             background: linear-gradient(135deg, var(--text-primary) 0%, var(--steel-gray) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -386,6 +409,16 @@
                 padding: 40px 20px;
             }
 
+            .title-container {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .logo-icon {
+                width: 60px;
+                height: 60px;
+            }
+
             .title {
                 font-size: 2.5rem;
             }
@@ -418,8 +451,11 @@
 
     <div class="container">
         <header>
-            <h1 class="title">VOLVE PRODUCTION DATABASE</h1>
-            <p class="subtitle">Equinor Volve Field Dataset · <span class="code-accent">Parquet Format</span> · Educational Repository</p>
+            <div class="title-container">
+                <img src="database-position-svgrepo-com.svg" alt="Volve Database Logo" class="logo-icon">
+                <h1 class="title">VOLVE DATABASE</h1>
+            </div>
+            <p class="subtitle">Equinor Volve Field Dataset · <span class="code-accent">Parquet Format</span></p>
         </header>
 
         <!-- Download Section -->
@@ -446,13 +482,13 @@
         <section>
             <h2>About This Dataset</h2>
             <p>
-                This repository provides the <strong>Equinor Volve field production data</strong> in Parquet format,
-                converted from the original dataset for educational and research purposes. The Volve field was
-                Norway's first fully disclosed oil field dataset, offering real-world production data for
+                This repository provides the <strong>Equinor Volve field data</strong> in Parquet format,
+                converted from the original dataset. The Volve field was
+                Norway's first fully disclosed oil field dataset, offering real-world data for
                 data engineering and analysis workflows.
             </p>
             <p>
-                The data has been structured into three normalized tables: daily production metrics,
+                The data has been structured into three normalized tables: daily metrics,
                 monthly aggregations, and well metadata. Perfect for learning SQL, data engineering,
                 or building analytical pipelines.
             </p>
@@ -576,10 +612,11 @@ result = con.<span class="function">execute</span>(<span class="string">"""
 
         <footer>
             <p>
-                Volve Production Database · Data from <a href="https://www.equinor.com/energy/volve-data-sharing" target="_blank" rel="noopener">Equinor Volve Data Village</a>
+                Volve Database · Data from <a href="https://www.equinor.com/energy/volve-data-sharing" target="_blank" rel="noopener">Equinor Volve Data Village</a>
             </p>
             <p style="margin-top: 8px; font-size: 0.85rem;">
-                Licensed under Creative Commons · For educational and research purposes
+                Licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> ·
+                <a href="https://www.equinor.com/content/dam/statoil/documents/what-we-do/Equinor-HRS-Terms-and-conditions-for-licence-to-data-Volve.pdf" target="_blank" rel="noopener">Official License Terms</a> ·
             </p>
         </footer>
     </div>
